@@ -41,12 +41,11 @@ class PageAuth extends BaseService {
 	 */
 	public static function getAccessToken($app_id, $app_secret, $code){
 		$url = "https://api.weixin.qq.com/sns/oauth2/access_token?grant_type=authorization_code";
-		$data = self::getJson($url, [
+		$data = self::getJsonSuccess($url, [
 			'appid'  => $app_id,
 			'secret' => $app_secret,
 			'code'   => $code,
 		]);
-		self::assertResultSuccess($data);
 		return [
 			'access_token'    => $data['access_token'], //网页授权接口调用凭证,注意：此access_token与基础支持的access_token不同
 			'expires_in'      => $data['expires_in'], //access_token接口调用凭证超时时间，单位（秒）
@@ -68,11 +67,10 @@ class PageAuth extends BaseService {
 	 */
 	public static function refreshAccessToken($app_id, $refresh_token){
 		$url = "https://api.weixin.qq.com/sns/oauth2/refresh_token?grant_type=refresh_token";
-		$data = self::getJson($url, [
+		$data = self::getJsonSuccess($url, [
 			'appid'         => $app_id,
 			'refresh_token' => $refresh_token,
 		]);
-		self::assertResultSuccess($data);
 		return [
 			'access_token'  => $data['access_token'],
 			'expires_in'    => $data['expires_in'],
@@ -91,11 +89,10 @@ class PageAuth extends BaseService {
 	 */
 	public static function validateAccessToken($access_token, $open_id){
 		$url = "https://api.weixin.qq.com/sns/auth";
-		$data = self::getJson($url, [
+		$data = self::getJsonSuccess($url, [
 			'access_token' => $access_token,
 			'openid'       => $open_id,
 		]);
-		self::assertResultSuccess($data);
 		return true;
 	}
 
@@ -109,12 +106,11 @@ class PageAuth extends BaseService {
 	 */
 	public static function getSnsUserInfo($access_token, $open_id, $lang = 'zh_CN'){
 		$url = 'https://api.weixin.qq.com/sns/userinfo';
-		$data = self::getJson($url, [
+		$data = self::getJsonSuccess($url, [
 			'access_token' => $access_token,
 			'openid'       => $open_id,
 			'lang'         => $lang,
 		]);
-		self::assertResultSuccess($data);
 		return [
 			'openid' => $data['openid'], //示例："openid": "OPENID",
 			'nickname' => $data['nickname'], //示例："nickname": NICKNAME,
@@ -137,11 +133,10 @@ class PageAuth extends BaseService {
 	 */
 	public static function getJsTicket($page_access_token){
 		$url = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?type=jsapi";
-		$data = self::getJson($url, [
+		$data = self::getJsonSuccess($url, [
 			'type'         => 'jsapi',
 			'access_token' => $page_access_token,
 		]);
-		self::assertResultSuccess($data);
 		return [
 			$data['ticket'],
 			$data['expires_in'],

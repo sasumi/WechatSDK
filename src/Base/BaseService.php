@@ -24,8 +24,20 @@ abstract class BaseService {
 		return $obj;
 	}
 
+	protected static function getJsonSuccess($url, $param = []){
+		$data = static::getJson($url, $param);
+		self::assertResultSuccess($data);
+		return $data;
+	}
+
 	protected static function getJson($url, $param = []){
 		return static::sendJsonRequest($url, $param, HTTP_METHOD_GET);
+	}
+
+	protected static function postJsonSuccess($url, $param = []){
+		$data = static::postJson($url, $param);
+		self::assertResultSuccess($data);
+		return $data;
 	}
 
 	protected static function postJson($url, $param = []){
