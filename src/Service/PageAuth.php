@@ -3,14 +3,24 @@
 namespace LFPhp\WechatSdk\Service;
 
 use LFPhp\WechatSdk\Base\BaseService;
+use function LFPhp\Func\rand_string;
 
 /**
+ * 页面鉴权相关（OAuth2.0）
  * @see https://developers.weixin.qq.com/doc/offiaccount/OA_Web_Apps/Wechat_webpage_authorization.html
  */
-class WebAuth extends BaseService {
+class PageAuth extends BaseService {
 	const SCOPE_BASE = 'snsapi_base'; //基本openid，静默授权
 	const SCOPE_USERINFO = 'snsapi_userinfo';//用户头像、昵称信息，弹窗确认
 
+	/**
+	 * 获取网页认证链接（个人订阅号无权限）
+	 * @param string $app_id
+	 * @param string $redirect_url
+	 * @param string $scope
+	 * @param string $state
+	 * @return string
+	 */
 	public static function getAuthUrl($app_id, $redirect_url, $scope, $state = ''){
 		return "https://open.weixin.qq.com/connect/oauth2/authorize?".http_build_query([
 				'appid'         => $app_id,
@@ -42,7 +52,7 @@ class WebAuth extends BaseService {
 			'expires_in'      => $data['expires_in'], //access_token接口调用凭证超时时间，单位（秒）
 			'refresh_token'   => $data['refresh_token'], //用户刷新access_token
 			'openid'          => $data['openid'], //用户唯一标识，请注意，在未关注公众号时，用户访问公众号的网页，也会产生一个用户和公众号唯一的OpenID
-			'scope'           => $data['scope'], //用户授权的作用域，使用逗号（,）分隔
+			'scope'           => explode(',',$data['scope']), //用户授权的作用域，使用逗号（,）分隔
 			'is_snapshotuser' => $data['is_snapshotuser'], //是否为快照页模式虚拟账号，只有当用户是快照页模式虚拟账号时返回，值为1
 			'unionid'         => $data['unionid'], //用户统一标识（针对一个微信开放平台账号下的应用，同一用户的 unionid 是唯一的），只有当scope为"snsapi_userinfo"时返回
 		];
@@ -116,5 +126,48 @@ class WebAuth extends BaseService {
 			'privilege' => $data['privilege'], //示例："privilege":[ "PRIVILEGE1" "PRIVILEGE2"     ],
 			'unionid' => $data['unionid'], //示例："unionid": "o6_bmasdasdsad6_2sgVt7hMZOPfL"
 		];
+	}
+
+	/**
+	 * 获取jsticket
+	 * jsapi_ticket的有效期为7200秒
+	 * @param string $page_access_token 网页单用户授权token
+	 * @return array [ticket, expires second]
+	 * @throws \LFPhp\WechatSdk\Exception\WechatException
+	 */
+	public static function getJsTicket($page_access_token){
+		$url = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?type=jsapi";
+		$data = self::getJson($url, [
+			'type'         => 'jsapi',
+			'access_token' => $page_access_token,
+		]);
+		self::assertResultSuccess($data);
+		return [
+			$data['ticket'],
+			$data['expires_in'],
+		];
+	}
+
+	public static function getJsSignatureSimple($jsapi_ticket, $url){
+		$nonce_str = rand_string(12);
+		$timestamp = time();
+		$signature = self::getJsSignature($jsapi_ticket, $url, $nonce_str, $timestamp);
+		return [
+			'noncestr'  => $nonce_str,
+			'timestamp' => $timestamp,
+			'signature' => $signature,
+		];
+	}
+
+	public static function getJsSignature($jsapi_ticket, $url, $nonce_str, $timestamp){
+		$data = [
+			'noncestr'     => $nonce_str,
+			'jsapi_ticket' => $jsapi_ticket,
+			'timestamp'    => $timestamp,
+			'url'          => $url,
+		];
+		ksort($data, SORT_ASC);
+		$query_str = http_build_query($data);
+		return sha1($query_str);
 	}
 }

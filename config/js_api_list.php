@@ -5,7 +5,7 @@ return [
 	'updateAppMessageShareData',
 	'updateTimelineShareData',
 	'onMenuShareTimeline',             //（即将废弃）
-	'onMenuShareAppMessage',                       //（即将废弃）
+	'onMenuShareAppMessage',           //（即将废弃）
 	'onMenuShareQQ',                  //（即将废弃）
 	'onMenuShareWeibo',
 	'onMenuShareQZone',
