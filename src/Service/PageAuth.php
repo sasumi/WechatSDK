@@ -37,7 +37,6 @@ class PageAuth extends BaseService {
 	 * @param string $app_secret
 	 * @param string $code
 	 * @return array
-	 * @throws \LFPhp\WechatSdk\Exception\WechatException
 	 */
 	public static function getAccessToken($app_id, $app_secret, $code){
 		$url = "https://api.weixin.qq.com/sns/oauth2/access_token?grant_type=authorization_code";
@@ -63,7 +62,6 @@ class PageAuth extends BaseService {
 	 * @param string $app_id
 	 * @param string $refresh_token
 	 * @return array
-	 * @throws \LFPhp\WechatSdk\Exception\WechatException
 	 */
 	public static function refreshAccessToken($app_id, $refresh_token){
 		$url = "https://api.weixin.qq.com/sns/oauth2/refresh_token?grant_type=refresh_token";
@@ -85,11 +83,10 @@ class PageAuth extends BaseService {
 	 * @param $access_token
 	 * @param $open_id
 	 * @return bool
-	 * @throws \LFPhp\WechatSdk\Exception\WechatException
 	 */
 	public static function validateAccessToken($access_token, $open_id){
 		$url = "https://api.weixin.qq.com/sns/auth";
-		$data = self::getJsonSuccess($url, [
+		self::getJsonSuccess($url, [
 			'access_token' => $access_token,
 			'openid'       => $open_id,
 		]);
