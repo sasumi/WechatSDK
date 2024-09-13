@@ -83,10 +83,11 @@ class PageAuth extends BaseService {
 	 * @param $access_token
 	 * @param $open_id
 	 * @return bool
+	 * @throws \LFPhp\WechatSdk\Exception\WechatException
 	 */
 	public static function validateAccessToken($access_token, $open_id){
 		$url = "https://api.weixin.qq.com/sns/auth";
-		self::getJsonSuccess($url, [
+		$data = self::getJsonSuccess($url, [
 			'access_token' => $access_token,
 			'openid'       => $open_id,
 		]);
