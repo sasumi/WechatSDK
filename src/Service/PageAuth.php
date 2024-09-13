@@ -39,11 +39,12 @@ class PageAuth extends BaseService {
 	 * @return array
 	 */
 	public static function getAccessToken($app_id, $app_secret, $code){
-		$url = "https://api.weixin.qq.com/sns/oauth2/access_token?grant_type=authorization_code";
+		$url = "https://api.weixin.qq.com/sns/oauth2/access_token";
 		$data = self::getJsonSuccess($url, [
-			'appid'  => $app_id,
-			'secret' => $app_secret,
-			'code'   => $code,
+			'grant_type' => 'authorization_code',
+			'appid'      => $app_id,
+			'secret'     => $app_secret,
+			'code'       => $code,
 		]);
 		return [
 			'access_token'    => $data['access_token'], //网页授权接口调用凭证,注意：此access_token与基础支持的access_token不同
@@ -64,8 +65,9 @@ class PageAuth extends BaseService {
 	 * @return array
 	 */
 	public static function refreshAccessToken($app_id, $refresh_token){
-		$url = "https://api.weixin.qq.com/sns/oauth2/refresh_token?grant_type=refresh_token";
+		$url = "https://api.weixin.qq.com/sns/oauth2/refresh_token";
 		$data = self::getJsonSuccess($url, [
+			'grant_type'    => 'refresh_token',
 			'appid'         => $app_id,
 			'refresh_token' => $refresh_token,
 		]);
@@ -83,11 +85,10 @@ class PageAuth extends BaseService {
 	 * @param $access_token
 	 * @param $open_id
 	 * @return bool
-	 * @throws \LFPhp\WechatSdk\Exception\WechatException
 	 */
 	public static function validateAccessToken($access_token, $open_id){
 		$url = "https://api.weixin.qq.com/sns/auth";
-		$data = self::getJsonSuccess($url, [
+		self::getJsonSuccess($url, [
 			'access_token' => $access_token,
 			'openid'       => $open_id,
 		]);
@@ -127,10 +128,9 @@ class PageAuth extends BaseService {
 	 * jsapi_ticket的有效期为7200秒
 	 * @param string $page_access_token 网页单用户授权token
 	 * @return array [ticket, expires second]
-	 * @throws \LFPhp\WechatSdk\Exception\WechatException
 	 */
 	public static function getJsTicket($page_access_token){
-		$url = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?type=jsapi";
+		$url = "https://api.weixin.qq.com/cgi-bin/ticket/getticket";
 		$data = self::getJsonSuccess($url, [
 			'type'         => 'jsapi',
 			'access_token' => $page_access_token,
