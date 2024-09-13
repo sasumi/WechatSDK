@@ -3,10 +3,9 @@
 namespace LFPhp\WechatSdk\Service;
 
 use LFPhp\WechatSdk\Base\BaseService;
-use function LFPhp\Func\rand_string;
 
 /**
- * 页面鉴权相关（OAuth2.0）
+ * 网页登录、鉴权相关（OAuth2.0）
  * @see https://developers.weixin.qq.com/doc/offiaccount/OA_Web_Apps/Wechat_webpage_authorization.html
  */
 class PageAuth extends BaseService {
@@ -121,46 +120,5 @@ class PageAuth extends BaseService {
 			'privilege' => $data['privilege'], //示例："privilege":[ "PRIVILEGE1" "PRIVILEGE2"     ],
 			'unionid' => $data['unionid'], //示例："unionid": "o6_bmasdasdsad6_2sgVt7hMZOPfL"
 		];
-	}
-
-	/**
-	 * 获取jsticket
-	 * jsapi_ticket的有效期为7200秒
-	 * @param string $page_access_token 网页单用户授权token
-	 * @return array [ticket, expires second]
-	 */
-	public static function getJsTicket($page_access_token){
-		$url = "https://api.weixin.qq.com/cgi-bin/ticket/getticket";
-		$data = self::getJsonSuccess($url, [
-			'type'         => 'jsapi',
-			'access_token' => $page_access_token,
-		]);
-		return [
-			$data['ticket'],
-			$data['expires_in'],
-		];
-	}
-
-	public static function getJsSignatureSimple($jsapi_ticket, $url){
-		$nonce_str = rand_string(12);
-		$timestamp = time();
-		$signature = self::getJsSignature($jsapi_ticket, $url, $nonce_str, $timestamp);
-		return [
-			'noncestr'  => $nonce_str,
-			'timestamp' => $timestamp,
-			'signature' => $signature,
-		];
-	}
-
-	public static function getJsSignature($jsapi_ticket, $url, $nonce_str, $timestamp){
-		$data = [
-			'noncestr'     => $nonce_str,
-			'jsapi_ticket' => $jsapi_ticket,
-			'timestamp'    => $timestamp,
-			'url'          => $url,
-		];
-		ksort($data, SORT_ASC);
-		$query_str = http_build_query($data);
-		return sha1($query_str);
 	}
 }
