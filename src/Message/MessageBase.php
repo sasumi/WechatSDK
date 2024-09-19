@@ -17,6 +17,11 @@ class MessageBase implements JsonSerializable {
 	const MSG_TYPE_EVENT = 'event';
 	const MSG_TYPE_TEXT = 'text';
 
+	const MSG_TYPE_MAP = [
+		self::MSG_TYPE_EVENT => '事件推送',
+		self::MSG_TYPE_TEXT  => '普通消息',
+	];
+
 	//开发者微信号
 	public $ToUserName;
 
