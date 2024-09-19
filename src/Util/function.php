@@ -55,11 +55,13 @@ function in_wework(){
 
 /**
  * xml转换成数组（忽略属性等）
- * @param string $xml
+ * @param string $xml_str
  * @return array
  */
-function xml_to_array($xml){
-	return json_decode(json_encode((array)simplexml_load_string($xml)), true);
+function xml_to_array($xml_str){
+	$xml = simplexml_load_string($xml_str, "SimpleXMLElement", LIBXML_NOCDATA);
+	$json = json_encode($xml);
+	return json_decode($json,true);
 }
 
 /**

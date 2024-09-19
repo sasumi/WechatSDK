@@ -21,6 +21,7 @@
 	    "ext-json": "*",
         "ext-curl": "*",
         "ext-simplexml": "*",
-	    "ext-mcrypt": "*"
+	    "ext-mcrypt": "*",
+        "ext-libxml": "*"
     }
 }
