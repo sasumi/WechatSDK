@@ -2,6 +2,7 @@
 namespace LFPhp\WechatSdk\Util;
 
 use Exception;
+use function LFPhp\Func\dump;
 
 /**
  * 微信JS API列表
@@ -10,7 +11,7 @@ use Exception;
 function wechat_js_api_list(){
 	static $api_list;
 	if(!isset($api_list)){
-		$api_list = include __DIR__.'/../../config/js_api_list.php';
+		$api_list = include __DIR__.'/js_api_list.php';
 	}
 	return $api_list;
 }
@@ -80,7 +81,7 @@ function array_to_xml($array, $content_only = false){
 					$val_str = $value;
 					break;
 				case 'string':
-					$val_str = "<![CDATA[".htmlspecialchars($val_str, ENT_XML1)."]]>";
+					$val_str = "<![CDATA[".htmlspecialchars($value, ENT_XML1)."]]>";
 					break;
 				default:
 					throw new Exception('no support type'.gettype($value));

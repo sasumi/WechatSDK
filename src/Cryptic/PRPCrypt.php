@@ -18,11 +18,12 @@ class PRPCrypt {
 	 * 对明文进行加密
 	 * @param string $text 需要加密的明文
 	 * @param string $app_id 需要加密的明文
+	 * @param string $rand_str 随机串，缺省为内部生成
 	 * @return string 加密后的密文
 	 */
-	public function encrypt($text, $app_id){
+	public function encrypt($app_id, $text, $rand_str = ''){
 		//获得16位随机字符串，填充到明文之前
-		$rand_str = rand_string(16);
+		$rand_str = $rand_str ?: rand_string(16);
 		$text = $rand_str.pack("N", strlen($text)).$text.$app_id;
 
 		// 网络字节序

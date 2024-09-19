@@ -36,14 +36,14 @@ class MsgCrypt {
 
 	/**
 	 * 构造函数
+	 * @param $app_id string 公众平台的appId
 	 * @param $token string 公众平台上，开发者设置的token
-	 * @param $encodingAesKey string 公众平台上，开发者设置的EncodingAESKey
-	 * @param $appId string 公众平台的appId
+	 * @param $encoding_aes_key string 公众平台上，开发者设置的EncodingAESKey
 	 */
-	public function __construct($token, $encodingAesKey, $appId){
+	public function __construct($app_id, $token, $encoding_aes_key){
+		$this->app_id = $app_id;
 		$this->token = $token;
-		$this->encoding_aes_key = $encodingAesKey;
-		$this->app_id = $appId;
+		$this->encoding_aes_key = $encoding_aes_key;
 	}
 
 	/**
@@ -56,14 +56,15 @@ class MsgCrypt {
 	 * @param string $replyMsg 公众平台待回复用户的消息，xml格式的字符串
 	 * @param int $timeStamp 时间戳，可以自己生成，也可以用URL参数的timestamp
 	 * @param string $nonce 随机串，可以自己生成，也可以用URL参数的nonce
+	 * @param string $rand_str 随机串，缺省为内部生成
 	 * @return string 加密后的可以直接回复用户的密文，包括msg_signature, timestamp, nonce, encrypt的xml格式的字符串,
 	 *                      当return返回0时有效
 	 */
-	public function encryptMsg($replyMsg, $timeStamp, $nonce){
+	public function encryptMsg($replyMsg, $timeStamp, $nonce, $rand_str = ''){
 		$pc = new PRPCrypt($this->encoding_aes_key);
 
 		//加密
-		$encrypt = $pc->encrypt($replyMsg, $this->app_id);
+		$encrypt = $pc->encrypt($this->app_id, $replyMsg, $rand_str);
 
 		//生成安全签名
 		$signature = wechat_sha1($this->token, $timeStamp, $nonce, $encrypt);

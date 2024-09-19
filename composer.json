@@ -6,7 +6,7 @@
             "LFPhp\\WechatSdk\\": "src/"
         },
         "files": [
-            "/src/Util/function.php"
+            "./src/Util/function.php"
         ]
     },
     "authors": [
