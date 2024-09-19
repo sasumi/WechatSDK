@@ -16,7 +16,7 @@ class QRCode extends AuthorizedService {
 	 * 创建临时二维码
 	 * @param string|int $scene 场景值，区分变量类型
 	 * @param int $expires
-	 * @return array
+	 * @return array [ticket, expire_seconds, url, qrcode_url]
 	 */
 	public static function createTemporaryQRCode($scene, $expires = 60){
 		$act = is_numeric($scene) ? self::QR_ACTION_SCENE : self::QR_ACTION_STR_SCENE;
@@ -26,7 +26,7 @@ class QRCode extends AuthorizedService {
 	/**
 	 * 创建永久二维码
 	 * @param string|int $scene
-	 * @return array
+	 * @return array [ticket, expire_seconds, url, qrcode_url]
 	 */
 	public static function createPermanentQRCode($scene){
 		if(is_numeric($scene) && $scene > 100000){

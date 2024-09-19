@@ -1,9 +1,11 @@
 <?php
 
-namespace LFPhp\WechatSdk\Message\Message;
-use LFPhp\WechatSdk\Message\MessageBase;
+namespace LFPhp\WechatSdk\Message;
 
-class MessageStandard extends MessageBase {
+/**
+ * 来自用户的消息，额外补充这个结构
+ */
+trait MessageExt {
 	//消息id，64位整型
 	public $MsgId;
 

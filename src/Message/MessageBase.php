@@ -9,17 +9,21 @@ use LFPhp\WechatSdk\Message\Event\EventLocation;
 use LFPhp\WechatSdk\Message\Event\EventScan;
 use LFPhp\WechatSdk\Message\Event\EventSubscribe;
 use LFPhp\WechatSdk\Message\Event\EventUnSubscribe;
-use LFPhp\WechatSdk\Message\Message\MessageStandard;
+use LFPhp\WechatSdk\Message\Message\MessageText;
 use ReflectionObject;
 use function LFPhp\WechatSdk\Util\array_to_xml;
 
 class MessageBase implements JsonSerializable {
 	const MSG_TYPE_EVENT = 'event';
 	const MSG_TYPE_TEXT = 'text';
+	const MSG_TYPE_IMAGE = 'image';
+	const MSG_TYPE_NEWS = 'news';
 
 	const MSG_TYPE_MAP = [
 		self::MSG_TYPE_EVENT => '事件推送',
-		self::MSG_TYPE_TEXT  => '普通消息',
+		self::MSG_TYPE_TEXT  => '文本消息',
+		self::MSG_TYPE_IMAGE => '图片消息',
+		self::MSG_TYPE_NEWS  => '图文消息',
 	];
 
 	//开发者微信号
@@ -33,9 +37,6 @@ class MessageBase implements JsonSerializable {
 
 	//消息类型，文本为text
 	public $MsgType;
-
-	//文本消息内容
-	public $Content;
 
 	final public static function getMessageInstance($raw_arr){
 		$class = self::resolveMessageClass($raw_arr);
@@ -54,7 +55,7 @@ class MessageBase implements JsonSerializable {
 
 	final public static function resolveMessageClass($raw_arr){
 		if($raw_arr['MsgType'] === self::MSG_TYPE_TEXT){
-			return MessageStandard::class;
+			return MessageText::class;
 		}
 		if($raw_arr['MsgType'] === self::MSG_TYPE_EVENT){
 			switch($raw_arr['Event']){
