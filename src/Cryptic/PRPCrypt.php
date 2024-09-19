@@ -33,7 +33,6 @@ class PRPCrypt {
 		$iv = substr($this->aes_key, 0, 16);
 
 		//使用自定义的填充方式对明文进行补位填充
-		$pkc_encoder = new PKCS7Encoder;
 		$text = PKCS7Encoder::encode($text);
 		mcrypt_generic_init($module, $this->aes_key, $iv);
 

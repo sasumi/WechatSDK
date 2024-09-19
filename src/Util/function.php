@@ -2,7 +2,7 @@
 namespace LFPhp\WechatSdk\Util;
 
 use Exception;
-use function LFPhp\Func\dump;
+use LFPhp\WechatSdk\Cryptic\MsgCrypt;
 
 /**
  * 微信JS API列表
@@ -14,6 +14,43 @@ function wechat_js_api_list(){
 		$api_list = include __DIR__.'/js_api_list.php';
 	}
 	return $api_list;
+}
+
+/**
+ * 微信URL配置验证
+ * @param string $access_token
+ * @param bool $as_return 返回还是直接输出
+ * @return string 校验通过字符串
+ */
+function wechat_echo_validation($access_token, $as_return = false){
+	$timestamp = $_GET['timestamp'];
+	$signature = $_GET['signature'];
+	$nonce = $_GET['nonce'];
+	$echo_str = $_GET['echostr'];
+	$validate_signature = wechat_sha1($timestamp, $nonce, $access_token);
+	if(!$as_return){
+		echo $validate_signature === $signature ? $echo_str : 'fail';
+	}
+	return $validate_signature === $signature ? $echo_str : '';
+}
+
+/**
+ * 自动处理微信回调
+ * @param string $app_id
+ * @param string $token
+ * @param string $encoding_aes_key
+ * @return array 回调数组
+ * @throws \Exception
+ */
+function wechat_decode_callback($app_id, $token, $encoding_aes_key){
+	$post_data = file_get_contents('php://input');
+	$msg_signature = $_GET['msg_signature'];
+	$timestamp = $_GET['timestamp'];
+	$nonce = $_GET['nonce'];
+
+	$pc = new MsgCrypt($app_id, $token, $encoding_aes_key);
+	$data = $pc->decryptMsg($msg_signature, $timestamp, $nonce, $post_data);
+	return xml_to_array($data);
 }
 
 /**

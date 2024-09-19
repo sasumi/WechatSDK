@@ -93,7 +93,7 @@ class MsgCrypt {
 	 */
 	public function decryptMsg($msg_signature, $timestamp, $nonce, $post_data){
 		if(strlen($this->encoding_aes_key) != 43){
-			throw new Exception('Illegal Aes Key');
+			throw new Exception('Illegal AES Key('.strlen($this->encoding_aes_key).')');
 		}
 
 		$timestamp = $timestamp ?: time();
@@ -104,11 +104,13 @@ class MsgCrypt {
 
 		//验证安全签名
 		$signature = wechat_sha1($this->token, $timestamp, $nonce, $encrypt_str);
+
 		if($signature != $msg_signature){
 			throw new Exception('Validate signature');
 		}
 
-		return $pc->decrypt($encrypt_str, $this->app_id);
+		$ret = $pc->decrypt($encrypt_str, $this->app_id);
+		return $ret;
 	}
 }
 
