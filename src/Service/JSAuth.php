@@ -2,32 +2,28 @@
 
 namespace LFPhp\WechatSdk\Service;
 
-use LFPhp\WechatSdk\Base\BaseService;
-use function LFPhp\Func\dump;
+use LFPhp\WechatSdk\Base\AuthorizedService;
 use function LFPhp\Func\rand_string;
 
 /**
  * JS-SDK 鉴权类
  */
-class JSAuth extends BaseService{
+class JSAuth extends AuthorizedService{
 	/**
 	 * 获取js ticket
 	 * jsapi_ticket的有效期为7200秒
-	 * @param string $access_token 网页单用户授权token
 	 * @return array [ticket, expires second]
 	 */
-	public static function getJsTicket($access_token){
+	public static function getJsTicket(){
 		$url = "https://api.weixin.qq.com/cgi-bin/ticket/getticket";
 		$data = self::getJsonSuccess($url, [
 			'type'         => 'jsapi',
-			'access_token' => $access_token,
 		]);
 		return [
 			$data['ticket'],
 			$data['expires_in'],
 		];
 	}
-
 
 	public static function getJsSignatureSimple($jsapi_ticket, $url){
 		$nonce_str = rand_string(12);

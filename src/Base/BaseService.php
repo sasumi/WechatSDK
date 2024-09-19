@@ -17,7 +17,7 @@ use const LFPhp\Func\HTTP_METHOD_POST;
 abstract class BaseService {
 	const DEFAULT_TIMEOUT = 20;
 
-	protected static function sendJsonRequest($url, array $param = [], $request_method = HTTP_METHOD_POST, $file_map = []){
+	protected static function sendJsonRequest($url, array $param = [], $request_method = HTTP_METHOD_POST, array $file_map = []){
 		$curl_opt = [CURLOPT_TIMEOUT => self::DEFAULT_TIMEOUT];
 		$logger = Logger::instance(__CLASS__);
 		$logger->info("[$request_method]", $url, $param, $file_map);

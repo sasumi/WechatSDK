@@ -3,7 +3,10 @@
 namespace LFPhp\WechatSdk\Base;
 use Exception;
 
-abstract class AuthorizedBaseService extends BaseService {
+/**
+ * 包含access token信息的基础服务
+ */
+abstract class AuthorizedService extends BaseService {
 	private static $access_token;
 
 	/**
@@ -16,11 +19,11 @@ abstract class AuthorizedBaseService extends BaseService {
 	/**
 	 * @param mixed $access_token
 	 */
-	protected static function setAccessToken($access_token){
+	public static function setAccessToken($access_token){
 		self::$access_token = $access_token;
 	}
 
-	protected static function sendJsonRequest($url, array $param = [], $request_method = 'post', $files = []){
+	protected static function sendJsonRequest($url, array $param = [], $request_method = 'post', array $file_map = []){
 		$access_token = static::getAccessToken();
 		if(!$access_token){
 			throw new Exception('access token required for call:'.static::class);
@@ -31,6 +34,6 @@ abstract class AuthorizedBaseService extends BaseService {
 		if(strtolower($request_method) == 'post'){
 			$url .= (strpos($url, '?') !== false ? '&' : '?').'access_token='.$access_token;
 		}
-		return parent::sendJsonRequest($url, $param, $request_method, $files);
+		return parent::sendJsonRequest($url, $param, $request_method, $file_map);
 	}
 }
