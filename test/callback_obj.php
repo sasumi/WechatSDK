@@ -13,16 +13,7 @@ $xml = '<xml><ToUserName><![CDATA[123132132]]></ToUserName>
 </xml>
 ';
 
-$data = ['ToUserName'   => 'gh_2a191e24f4d4',
-         'FromUserName' => 'oR2ef6Pr2cmqAvp6zXGXM0C-c7RE',
-         'CreateTime'   => '1726740548',
-         'MsgType'      => 'event',
-         'Event'        => 'SCAN',
-         'EventKey'     => 'b5afa47d5a8e891c780061e3dd712611',
-         'Ticket'       => 'gQFt8DwAAAAAAAAAAS5odHRwOi8vd2VpeGluLnFxLmNvbS9xLzAyQzM3RmtiN0RldkUxWk9VSDFDY1gAAgQx_OtmAwRBAAAA',
-];
-
-$ins = MessageBase::getMessageInstance($data);
+$ins = MessageBase::getMessageInstance(\LFPhp\WechatSdk\Util\xml_to_array($xml));
 
 \LFPhp\Func\dump(json_encode($ins), 1);
 
