@@ -42,6 +42,8 @@ if($_GET['echostr']){
 
 ## 2. 接收处理微信回调
 
+### 2.1 获取回调数据
+
 在上述处理响应代码中，继续追加正常微信回调业务代码：
 
 ```php
@@ -61,8 +63,26 @@ var_dump($data);
 上述代码中 `$data`
 即为微信回调数组，详细格式请参考 [微信开发文档](https://developers.weixin.qq.com/doc/offiaccount/Message_Management/Receiving_standard_messages.html)
 
-## 3. 获取 `access_token` `js_ticket` `page_access_token`
+### 2.2 转换为事件对象
+以下示例仅以普通文本消息为例
+```php
+//$data 为上一步骤中解析出来的数组
+$receive_msg = MessageBase::getMessageInstance($data);
+if($receive_msg instanceof EventSubscribe ||
+    $receive_msg instanceof EventScan){
+    $success_msg = new MessageText;
+    $success_msg->ToUserName = $receive_msg->FromUserName;
+    $success_msg->FromUserName = $receive_msg->ToUserName;
+    $success_msg->CreateTime = time();
+    if($receive_msg->Ticket){
+        //公众号扫码成功
+    } else {
+        //公众号扫码订阅成功
+    }
+}
+```
 
+## 3. 获取 `access_token` `js_ticket` `page_access_token`
 > 公众号后端接口调用基本都依赖 `access_token`，应用需要获取 `access_token` 保存到本地，并定期刷新 `access_token` （一般有效期为 7200 s） 
 > 应用H5页面js调用接口需要 js_ticket 信息（一般有效期为7200s），应用需要获取并刷新该 js_ticket
 > 微信环境H5 oAuth方式登录依赖页面page_access_token(不是后端接口的access_token)
