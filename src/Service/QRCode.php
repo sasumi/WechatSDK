@@ -4,7 +4,7 @@ namespace LFPhp\WechatSdk\Service;
 
 use Exception;
 use LFPhp\WechatSdk\Base\AuthorizedService;
-use function LFPhp\Func\array_clear_null;
+use function LFPhp\Func\array_clean_null;
 use function LFPhp\Func\encodeURI;
 
 class QRCode extends AuthorizedService {
@@ -51,7 +51,7 @@ class QRCode extends AuthorizedService {
 			$action_info['scene']['scene_str'] = $scene;
 		}
 
-		$ret = self::postJsonSuccess($url, array_clear_null([
+		$ret = self::postJsonSuccess($url, array_clean_null([
 			'expire_seconds' => $expires,
 			'action_name'    => $action,
 			'action_info'    => $action_info,

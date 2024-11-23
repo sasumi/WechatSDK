@@ -109,8 +109,7 @@ class MsgCrypt {
 			throw new Exception('Validate signature');
 		}
 
-		$ret = $pc->decrypt($encrypt_str, $this->app_id);
-		return $ret;
+		return $pc->decrypt($encrypt_str, $this->app_id);
 	}
 }
 
