@@ -5,8 +5,12 @@
         "psr-4": {
             "LFPhp\\WechatSdk\\": "src/"
         },
+        "exclude-from-classmap": [
+            "test/"
+        ],
         "files": [
-            "./src/Util/function.php"
+            "./src/Util/function.php",
+            "./src/Pay/Constant.php"
         ]
     },
     "authors": [
@@ -19,8 +23,9 @@
         "ext-json": "*",
         "ext-curl": "*",
         "ext-simplexml": "*",
-	    "ext-mcrypt": "*",
+        "ext-mcrypt": "*",
         "ext-libxml": "*",
-        "lfphp/logger": "^2.0"
+        "lfphp/logger": "^2.0",
+        "lfphp/func": "^2.0"
     }
 }

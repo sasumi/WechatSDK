@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "348bac29e6d5b07519abfa800b9f8fa4",
+    "content-hash": "e3e6ad677b516e01a1d85f74bc2d5155",
     "packages": [
         {
             "name": "lfphp/func",
-            "version": "2.0.1",
+            "version": "2.0.71",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sasumi/Func.git",
-                "reference": "ce908b9bf6b3ec90a2051e41026db5708612836c"
+                "reference": "a5b5e058583f3c33f13553b92054d1f7b4bb9e8c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sasumi/Func/zipball/ce908b9bf6b3ec90a2051e41026db5708612836c",
-                "reference": "ce908b9bf6b3ec90a2051e41026db5708612836c",
+                "url": "https://api.github.com/repos/sasumi/Func/zipball/a5b5e058583f3c33f13553b92054d1f7b4bb9e8c",
+                "reference": "a5b5e058583f3c33f13553b92054d1f7b4bb9e8c",
                 "shasum": ""
             },
             "require": {
@@ -46,6 +46,8 @@
                     "src/font.php",
                     "src/html.php",
                     "src/http.php",
+                    "src/image.php",
+                    "src/mail.php",
                     "src/session.php",
                     "src/sheet.php",
                     "src/string.php",
@@ -71,7 +73,7 @@
             ],
             "support": {
                 "issues": "https://github.com/sasumi/Func/issues",
-                "source": "https://github.com/sasumi/Func/tree/2.0.1"
+                "source": "https://github.com/sasumi/Func/tree/2.0.71"
             },
             "funding": [
                 {
@@ -79,20 +81,20 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-11-22T13:13:54+00:00"
+            "time": "2025-07-06T13:35:35+00:00"
         },
         {
             "name": "lfphp/logger",
-            "version": "2.0.1",
+            "version": "2.0.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sasumi/Logger.git",
-                "reference": "d0c5f2e65bdaf60a6226293f511399024c6b704a"
+                "reference": "13ad10a80442a96ebb7ddfaad1f088f38c658160"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sasumi/Logger/zipball/d0c5f2e65bdaf60a6226293f511399024c6b704a",
-                "reference": "d0c5f2e65bdaf60a6226293f511399024c6b704a",
+                "url": "https://api.github.com/repos/sasumi/Logger/zipball/13ad10a80442a96ebb7ddfaad1f088f38c658160",
+                "reference": "13ad10a80442a96ebb7ddfaad1f088f38c658160",
                 "shasum": ""
             },
             "require": {
@@ -130,9 +132,9 @@
             ],
             "support": {
                 "issues": "https://github.com/sasumi/Logger/issues",
-                "source": "https://github.com/sasumi/Logger/tree/2.0.1"
+                "source": "https://github.com/sasumi/Logger/tree/2.0.5"
             },
-            "time": "2024-11-23T10:54:31+00:00"
+            "time": "2025-07-06T14:41:29+00:00"
         }
     ],
     "packages-dev": [],

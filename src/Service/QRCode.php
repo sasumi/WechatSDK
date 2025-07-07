@@ -8,9 +8,11 @@ use function LFPhp\Func\array_clean_null;
 use function LFPhp\Func\encodeURI;
 
 class QRCode extends AuthorizedService {
-	const QR_ACTION_SCENE = 'QR_SCENE';
-	const QR_ACTION_STR_SCENE = 'QR_STR_SCENE';
-	const QR_ACTION_LIMIT_SCENE = 'QR_LIMIT_SCENE';
+	//二维码类型
+	const QR_ACTION_SCENE = 'QR_SCENE'; //临时二维码，整型参数值，32位非0整型
+	const QR_ACTION_STR_SCENE = 'QR_STR_SCENE'; //临时二维码，字符串参数值，长度限制为1到64
+	const QR_ACTION_LIMIT_SCENE = 'QR_LIMIT_SCENE'; //永久二维码，整型参数值，最大值为100000（目前参数只支持1--100000）或 场景值ID（字符串形式的ID）
+	const QR_ACTION_LIMIT_STR_SCENE = 'QR_LIMIT_STR_SCENE'; //永久二维码，字符串参数值，长度限制为1到64
 
 	/**
 	 * 创建临时二维码
@@ -37,8 +39,8 @@ class QRCode extends AuthorizedService {
 
 	/**
 	 * 创建二维码
-	 * @param string $action 二维码类型，QR_SCENE为临时的整型参数值，QR_STR_SCENE为临时的字符串参数值，QR_LIMIT_SCENE为永久的整型参数值，QR_LIMIT_STR_SCENE为永久的字符串参数值
-	 * @param string|int $scene 场景值ID，临时二维码时为32位非0整型，永久二维码时最大值为100000（目前参数只支持1--100000）或 场景值ID（字符串形式的ID），字符串类型，长度限制为1到64
+	 * @param string $action 二维码类型
+	 * @param string|int $scene 场景值ID
 	 * @param int $expires 该二维码有效时间，以秒为单位。 最大不超过2592000（即30天）,永久二维码不需要这个字段
 	 * @return array
 	 */
