@@ -21,17 +21,27 @@ abstract class BaseService {
 
 	/**
 	 * 发送请求
+	 * @param string $url
+	 * @param mixed $param
+	 * @param string $request_method
+	 * @param array $file_map
+	 * @param array $headers
+	 * @return array|null
 	 */
-	protected static function sendJsonRequest($url, array $param = [], $request_method = HTTP_METHOD_POST, array $file_map = [], $headers = []) {
-		$curl_opt = [CURLOPT_TIMEOUT => self::DEFAULT_TIMEOUT, CURLOPT_HTTPHEADER => $headers];
+	protected static function sendJsonRequest($url, $param = null, $request_method = HTTP_METHOD_POST, array $file_map = [], $headers = []) {
+		if (is_array($param)) {
+			$param = array_clean_null($param);
+		}
+
 		$logger = Logger::instance(__CLASS__);
 		$logger->info("[$request_method]", $url, $param, $file_map);
 
-		$param = array_clean_null($param);
+		$curl_opt = [CURLOPT_TIMEOUT => self::DEFAULT_TIMEOUT, CURLOPT_HTTPHEADER => $headers];
 		switch ($request_method) {
 			case HTTP_METHOD_GET:
 				$ret = curl_get($url, $param, $curl_opt);
 				break;
+
 			case HTTP_METHOD_POST:
 				if ($file_map) {
 					$ret = curl_post_file($url, $file_map, $param, $curl_opt);
@@ -39,6 +49,7 @@ abstract class BaseService {
 					$ret = curl_post_json($url, $param, $curl_opt);
 				}
 				break;
+
 			default:
 				$ret = curl_query($url, array_merge_assoc([
 					CURLOPT_POSTFIELDS    => curl_data2str($param),
@@ -67,7 +78,7 @@ abstract class BaseService {
 
 	protected static function getJsonSuccess($url, $param = []) {
 		$data = static::getJson($url, $param);
-		self::assertResultSuccess($data);
+		static::assertResultSuccess($data);
 		return $data;
 	}
 
@@ -77,7 +88,7 @@ abstract class BaseService {
 
 	protected static function postJsonSuccess($url, $param = []) {
 		$data = static::postJson($url, $param);
-		self::assertResultSuccess($data);
+		static::assertResultSuccess($data);
 		return $data;
 	}
 

@@ -6,6 +6,10 @@
         "classmap"
     ],
     "compoundWords": true,
-    "ignoreWords": [],
+    "ignoreWords": [
+        "wechat",
+        "wechatpay",
+        "mchid",
+    ],
     "import": []
 }

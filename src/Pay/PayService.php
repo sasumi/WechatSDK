@@ -2,10 +2,13 @@
 
 namespace LFPhp\WechatSdk\Pay;
 
+use Exception;
 use LFPhp\WechatSdk\Base\BaseService;
 use LFPhp\WechatSdk\Exception\PayException;
 
+use function LFPhp\Func\array_clean_null;
 use function LFPhp\Func\assert_via_exception;
+use function LFPhp\Func\dump;
 use function LFPhp\Func\is_url;
 use const LFPhp\Func\HTTP_METHOD_GET;
 use const LFPhp\Func\HTTP_METHOD_POST;
@@ -32,6 +35,12 @@ abstract class PayService extends BaseService {
     final private function __construct() {
     }
 
+    protected static function assertResultSuccess($rsp) {
+        if ($rsp['code'] && $rsp['code'] !== 'SUCCESS') {
+            throw new PayException($rsp['message'], -1);
+        }
+    }
+
     public static function setMerchantInfo($merchant_info) {
         $keys = array_diff(array_keys(self::$merchant_info), array_keys($merchant_info));
         if ($keys) {
@@ -54,24 +63,46 @@ abstract class PayService extends BaseService {
 
     /**
      * 微信支付签名
+     * @param string $url
+     * @param string $request_method
+     * @param array|string $param
+     * @see https://pay.weixin.qq.com/wiki/doc/apiv3/wechatpay/wechatpay4_0.shtml
      */
-    private static function getAuthorization($url, $request_method, $param) {
+    private static function getAuthorization($url, $request_method, $param = '') {
         $timestamp = time();
         $nonce_str = bin2hex(random_bytes(16));
+        $body = '';
         $url_path = parse_url($url, PHP_URL_PATH);
         $query = parse_url($url, PHP_URL_QUERY);
+
         // GET请求需要把param拼到query里
         if ($request_method === HTTP_METHOD_GET && $param) {
             $query_arr = [];
             if ($query) {
                 parse_str($query, $query_arr);
             }
+            if (is_string($param)) {
+                parse_str($param, $tmp);
+                $param = $tmp;
+            } else if (!is_array($param)) {
+                throw new Exception('param must be array or string');
+            }
             $query_arr = array_merge($query_arr, $param);
             ksort($query_arr); // 微信建议参数按字典序排序
             $query = http_build_query($query_arr);
         }
         $canonical_url = $url_path . ($query ? "?$query" : '');
-        $body = $request_method === HTTP_METHOD_GET ? '' : json_encode($param, JSON_UNESCAPED_UNICODE);
+
+        //POST请求需要把param转为JSON
+        if ($request_method === HTTP_METHOD_POST && $param) {
+            if (is_string($param)) {
+                $body = $param;
+            } else if (is_array($param)) {
+                $body = json_encode($param, JSON_UNESCAPED_UNICODE);
+            } else {
+                throw new Exception('param must be array or string');
+            }
+        }
         $message = "{$request_method}\n{$canonical_url}\n{$timestamp}\n{$nonce_str}\n{$body}\n";
 
         $privateKey = file_get_contents(self::$merchant_info['merchant_private_key_file']);
@@ -95,14 +126,19 @@ abstract class PayService extends BaseService {
     /**
      * 发送JSON请求
      * @param string $url
-     * @param array $param
+     * @param mixed $param
      * @param string $request_method
      * @param array $file_map
      * @param array $headers
      */
-    protected static function sendJsonRequest($url, array $param = [], $request_method = HTTP_METHOD_POST, array $file_map = [], $headers = []) {
+    protected static function sendJsonRequest($url, $param = null, $request_method = HTTP_METHOD_POST, array $file_map = [], $headers = []) {
         if (!is_url($url)) {
             $url = self::patchApiUrl($url);
+        }
+        //POST方法，直接转换成JSON，避免后面计算签名时出错
+        if ($request_method === HTTP_METHOD_POST && is_array($param)) {
+            $param = array_clean_null($param);
+            $param = json_encode($param, JSON_UNESCAPED_UNICODE);
         }
         $headers = array_merge([
             'Accept' => 'application/json',
@@ -114,7 +150,8 @@ abstract class PayService extends BaseService {
 
     public static function getCertificates() {
         $rsp = self::getJsonSuccess('v3/certificates');
-        echo (string) $rsp->getBody(), PHP_EOL;
+        //todo
+        dump($rsp, 1);
     }
 
     /**
@@ -129,10 +166,10 @@ abstract class PayService extends BaseService {
      */
     public static function validateCallback() {
         $headers = getallheaders();
-        $wechatpay_timestamp = $headers['Wechatpay-Timestamp'] ?? '';
-        $wechatpay_nonce = $headers['Wechatpay-Nonce'] ?? '';
-        $wechatpay_signature = $headers['Wechatpay-Signature'] ?? '';
-        $wechatpay_serial = $headers['Wechatpay-Serial'] ?? '';
+        $wechatpay_timestamp = $headers['Wechatpay-Timestamp'] ?? null;
+        $wechatpay_nonce = $headers['Wechatpay-Nonce'] ?? null;
+        $wechatpay_signature = $headers['Wechatpay-Signature'] ?? null;
+        $wechatpay_serial = $headers['Wechatpay-Serial'] ?? null;
 
         //获取请求体
         $body = file_get_contents('php://input');
@@ -191,15 +228,16 @@ abstract class PayService extends BaseService {
      *     "create_time": "2019-08-26T10:39:04+08:00",
      }
      */
-    public static function refunds($param) {
-        $transaction_id = $param['transaction_id'] ?? '';
-        $out_trade_no = $param['out_trade_no'] ?? '';
+    public static function applyRefund($param) {
+        $transaction_id = $param['transaction_id'] ?? null;
+        $out_trade_no = $param['out_trade_no'] ?? null;
         $out_refund_no = $param['out_refund_no'];
-        $reason = $param['reason'] ?? '';
-        $notify_url = $param['notify_url'] ?? '';
+        $reason = $param['reason'] ?? null;
+        $notify_url = $param['notify_url'] ?? null;
         $amount = $param['amount'];
         $total = $param['total'];
         $currency = $param['currency'] ?? CURRENCY_CNY;
+        $funds_account = $param['funds_account'] ?? null;
 
         if (!$amount) {
             throw new PayException('退款金额amount不能为空');
@@ -220,12 +258,38 @@ abstract class PayService extends BaseService {
             'out_refund_no' => $out_refund_no,
             'reason' => $reason,
             'notify_url' => $notify_url,
-            'funds_account' => '',
+            'funds_account' => $funds_account,
             'amount' => [
                 'refund' => $amount,
                 'total' => $total,
                 'currency' => $currency,
             ]
+        ]);
+        return $rsp;
+    }
+
+
+    /**
+     * 发起异常退款
+     * 提交退款申请后，退款结果通知或查询退款确认状态为退款异常，可调用此接口发起异常退款处理。支持退款至用户、退款至交易商户银行账户两种处理方式。
+     */
+    public static function applyAbnormalRefund($param) {
+        if (!$param['refund_id']) {
+            throw new PayException('refund_id不能为空');
+        }
+        if (!$param['out_refund_no']) {
+            throw new PayException('out_refund_no不能为空');
+        }
+        if (!$param['type']) {
+            throw new PayException('异常退款处理方式type不能为空');
+        }
+
+        $rsp = self::postJsonSuccess("/v3/refund/domestic/refunds/{$param['refund_id']}/apply-abnormal-refund", [
+            'out_refund_no' => $param['out_refund_no'], //【商户退款单号】商户申请退款时传入的商户系统内部退款单号。
+            'type' => $param['type'],
+            'bank_type' => $param['bank_type'] ?? null, //银行类型，值列表详见银行类型。仅支持招行、交通银行、农行、建行、工商、中行、平安、浦发、中信、光大、民生、兴业、广发、邮储、宁波银行的借记卡。若退款至用户此字段必填。
+            'bank_account' => $param['bank_account'] ?? null, //收款银行卡号
+            'real_name' => $param['real_name'] ?? null, //收款用户姓名
         ]);
         return $rsp;
     }
@@ -241,6 +305,7 @@ abstract class PayService extends BaseService {
         ]);
         return $rsp;
     }
+
     /**
      * 查询订单
      * @param string $out_trade_no
