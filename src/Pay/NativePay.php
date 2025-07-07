@@ -24,7 +24,7 @@ class NativePay extends PayService {
             'amount' => 0,
             'currency' => CURRENCY_CNY
         ], $param);
-        $rsp = self::postJson(
+        $rsp = self::postJsonSuccess(
             '/v3/pay/transactions/native',
             [
                 'appid' => self::getAppId(),
@@ -38,7 +38,6 @@ class NativePay extends PayService {
                 ]
             ]
         );
-        self::assertResultSuccess($rsp);
         return $rsp['code_url'];
     }
 }

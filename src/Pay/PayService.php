@@ -113,7 +113,7 @@ abstract class PayService extends BaseService {
     }
 
     public static function getCertificates() {
-        $rsp = self::getJson('v3/certificates');
+        $rsp = self::getJsonSuccess('v3/certificates');
         echo (string) $rsp->getBody(), PHP_EOL;
     }
 
@@ -158,7 +158,7 @@ abstract class PayService extends BaseService {
     /**
      * 关闭订单
      */
-    public static function closeOrder($out_trade_no) {
+    public static function closeOrderByOutTradeNo($out_trade_no) {
         $rsp = self::postJson("/v3/pay/transactions/out-trade-no/$out_trade_no/close", [
             'mchid' => self::getMerchantId()
         ]);
@@ -170,7 +170,7 @@ abstract class PayService extends BaseService {
      * @param array $param
      * @param string $param['transaction_id']  微信支付订单号
      * @param string $param['out_trade_no']  商户订单号
-     * @param string $param['refund_no']  商户退款单号
+     * @param string $param['out_refund_no']  商户退款单号
      * @param string $param['reason']  退款原因
      * @param string $param['notify_url']  退款结果通知URL
      * @param int $param['amount']  退款金额
@@ -185,38 +185,48 @@ abstract class PayService extends BaseService {
      *     "refund_id": "2006001091201407033233368018",
      *     "out_refund_no": "1217752501201407033233368018",
      *     "transaction_id": "1217752501201407033233368018",
-     *    "out_trade_no": "1217752501201407033233368018",
+     *     "out_trade_no": "1217752501201407033233368018",
      *     "channel": "ORIGINAL",
      *     "status": "SUCCESS",
      *     "create_time": "2019-08-26T10:39:04+08:00",
      }
      */
-    public static function refund($param) {
+    public static function refunds($param) {
         $transaction_id = $param['transaction_id'] ?? '';
         $out_trade_no = $param['out_trade_no'] ?? '';
-        $refund_no = $param['refund_no'] ?? '';
+        $out_refund_no = $param['out_refund_no'];
         $reason = $param['reason'] ?? '';
         $notify_url = $param['notify_url'] ?? '';
-        $amount = $param['amount'] ?? 0;
-        $total = $param['total'] ?? 0;
+        $amount = $param['amount'];
+        $total = $param['total'];
+        $currency = $param['currency'] ?? CURRENCY_CNY;
+
+        if (!$amount) {
+            throw new PayException('退款金额amount不能为空');
+        }
+        if (!$total) {
+            throw new PayException('订单金额total不能为空');
+        }
+        if (!$out_refund_no) {
+            throw new PayException('out_refund_no不能为空');
+        }
         if (!$transaction_id && !$out_trade_no) {
             throw new PayException('transaction_id和out_trade_no不能同时为空');
         }
 
-        $rsp = self::postJson("/v3/refund/domestic/refunds", [
+        $rsp = self::postJsonSuccess("/v3/refund/domestic/refunds", [
             'transaction_id' => $transaction_id,
             'out_trade_no' => $out_trade_no,
-            'out_refund_no' => $refund_no,
+            'out_refund_no' => $out_refund_no,
             'reason' => $reason,
             'notify_url' => $notify_url,
             'funds_account' => '',
             'amount' => [
                 'refund' => $amount,
                 'total' => $total,
-                'currency' => CURRENCY_CNY,
+                'currency' => $currency,
             ]
         ]);
-        self::assertResultSuccess($rsp);
         return $rsp;
     }
 
@@ -226,10 +236,9 @@ abstract class PayService extends BaseService {
      * @return array
      */
     public static function queryOrderByTransactionId($transaction_id) {
-        $rsp = self::getJson("/v3/pay/transactions/id/$transaction_id", [
+        $rsp = self::getJsonSuccess("/v3/pay/transactions/id/$transaction_id", [
             'mchid' => self::getMerchantId()
         ]);
-        self::assertResultSuccess($rsp);
         return $rsp;
     }
     /**
@@ -238,10 +247,9 @@ abstract class PayService extends BaseService {
      * @return array
      */
     public static function queryOrderByOutTradeNo($out_trade_no) {
-        $rsp = self::getJson("/v3/pay/transactions/out-trade-no/$out_trade_no", [
+        $rsp = self::getJsonSuccess("/v3/pay/transactions/out-trade-no/$out_trade_no", [
             'mchid' => self::getMerchantId()
         ]);
-        self::assertResultSuccess($rsp);
         return $rsp;
     }
 }
