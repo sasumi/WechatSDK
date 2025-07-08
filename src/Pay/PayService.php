@@ -268,7 +268,6 @@ abstract class PayService extends BaseService {
         return $rsp;
     }
 
-
     /**
      * 发起异常退款
      * 提交退款申请后，退款结果通知或查询退款确认状态为退款异常，可调用此接口发起异常退款处理。支持退款至用户、退款至交易商户银行账户两种处理方式。
