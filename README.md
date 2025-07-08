@@ -317,7 +317,59 @@ wx.ready(()=>{
 });
 </script>
 ```
+## 8.微信支付
+微信支付需要使用到微信支付平台申请的商户号，具体请参考微信支付官方文档
+以下为当前库涉及微信支付需要配置项：
+```php
+$merchant_info = [
+    'app_id' => '', //「应用ID」
+    'merchant_id' => '', //「商户号」
+    'merchant_certificate_serial' => '', //「商户API证书」的「证书序列号」
+    'merchant_private_key_file' => 'abc.pem', //商户API证书文件
+    'platform_certificate_serial' => '', //「微信支付平台证书」的「平台证书序列号」, 可以从「微信支付平台证书」文件解析，也可以在 商户平台 -> 账户中心 -> API安全 查询到
+    'platform_certificate_file' => '', //从本地文件中加载「微信支付平台证书」，可由内置CLI工具下载到，用来验证微信支付应答的签名
+    'platform_public_key_id' => '', //「微信支付公钥」的「微信支付公钥ID」，需要在 商户平台 -> 账户中心 -> API安全 查询
+    'platform_public_key_file' => 'puk.pem', //从本地文件中加载「微信支付公钥」，用来验证微信支付应答的签名
+];
+```
 
-## 8. 其他场景应用
+### 8.1 支付配置初始化
+
+```php
+//初始化外部浏览器微信支付
+NativePay::setMerchantInfo($merchant_info);
+
+//初始化微信内嵌H5环境微信支付
+//todo
+```
+
+### 8.2 支付、退款、查询订单（以native环境为例）
+```php
+<?php
+use LFPhp\WechatSdk\Service\NativePay;
+
+//【1】生成支付订单
+$qrcode_url = NativePay::makeOrder([
+    'out_trade_no' => 'abc123',
+    'notify_url' => '',
+    'product_name' => 'text',
+    'amount' => 1,
+]);
+
+//支付二维码，可以使用QRCode相关代码库实现
+var_dump($qrcode_url);
+
+//【2】查询订单
+$order_info = NativePay::queryOrderByOutTradeNo('abc123');
+
+//【3】申请退款
+$refund_info = NativePay::applyRefund([
+  "out_trade_no"=> "1217752501201407033233368018",
+  "out_refund_no"=> "1217752501201407033233368018",
+  "total" => 1,
+  "amount" => 1
+]);
+
+## 9. 其他场景应用
 1. [公众号扫码订阅方式登录](./mp_subscribe_login.md)
 //todo
