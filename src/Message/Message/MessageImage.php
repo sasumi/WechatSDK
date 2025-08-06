@@ -9,4 +9,8 @@ class MessageImage extends MessageBase {
 
 	//图片，结构为：['MediaId'=>'abc']
 	public $Image;
+
+	public function setMediaId($media_id) {
+		$this->Image = ['MediaId' => $media_id];
+	}
 }

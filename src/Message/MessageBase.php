@@ -18,12 +18,18 @@ class MessageBase implements JsonSerializable {
 	const MSG_TYPE_TEXT = 'text';
 	const MSG_TYPE_IMAGE = 'image';
 	const MSG_TYPE_NEWS = 'news';
+	const MSG_TYPE_MUSIC = 'music';
+	const MSG_TYPE_VOICE = 'voice';
+	const MSG_TYPE_VIDEO = 'video';
 
 	const MSG_TYPE_MAP = [
 		self::MSG_TYPE_EVENT => '事件推送',
 		self::MSG_TYPE_TEXT  => '文本消息',
 		self::MSG_TYPE_IMAGE => '图片消息',
 		self::MSG_TYPE_NEWS  => '图文消息',
+		self::MSG_TYPE_MUSIC => '音乐消息',
+		self::MSG_TYPE_VOICE => '语音消息',
+		self::MSG_TYPE_VIDEO => '视频消息',
 	];
 
 	//开发者微信号
@@ -38,27 +44,27 @@ class MessageBase implements JsonSerializable {
 	//消息类型，文本为text
 	public $MsgType;
 
-	final public static function getMessageInstance($raw_arr){
+	final public static function getMessageInstance($raw_arr) {
 		$class = self::resolveMessageClass($raw_arr);
 		$instance = new $class();
 		$ri = new ReflectionObject($instance);
 		$properties = $ri->getProperties();
 
-		foreach($properties as $pro){
+		foreach ($properties as $pro) {
 			$name = $pro->name;
-			if(isset($raw_arr[$name])){
+			if (isset($raw_arr[$name])) {
 				$instance->{$name} = $raw_arr[$name];
 			}
 		}
 		return $instance;
 	}
 
-	final public static function resolveMessageClass($raw_arr){
-		if($raw_arr['MsgType'] === self::MSG_TYPE_TEXT){
+	final public static function resolveMessageClass($raw_arr) {
+		if ($raw_arr['MsgType'] === self::MSG_TYPE_TEXT) {
 			return MessageText::class;
 		}
-		if($raw_arr['MsgType'] === self::MSG_TYPE_EVENT){
-			switch($raw_arr['Event']){
+		if ($raw_arr['MsgType'] === self::MSG_TYPE_EVENT) {
+			switch ($raw_arr['Event']) {
 				case EventBase::EVENT_SUBSCRIBE:
 					return EventSubscribe::class;
 				case EventBase::EVENT_UNSUBSCRIBE:
@@ -72,15 +78,15 @@ class MessageBase implements JsonSerializable {
 		throw new Exception('message type no support');
 	}
 
-	public function toXml(){
+	public function toXml() {
 		return array_to_xml($this->toArray());
 	}
 
-	public function toArray(){
+	public function toArray() {
 		return (array)$this;
 	}
 
-	public function jsonSerialize(){
+	public function jsonSerialize() {
 		return $this->toArray();
 	}
 }
