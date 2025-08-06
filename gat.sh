@@ -15,7 +15,7 @@ if [ -z "$last_tag" ]; then
   echo "⚠️ 未找到tag，默认初始版本为 0.0.1"
   new_version="0.0.1"
 else
-  echo "🔍 当前Tag：$last_tag"
+  echo "🔍 当前tag：$last_tag"
   # 判断是否带 v 前缀
   if echo "$last_tag" | grep -q "^v"; then
     has_v_prefix=true
@@ -41,7 +41,7 @@ echo "✅ 新版本号：$new_version"
 
 # 创建并推送 tag
 git tag "$new_version"
-echo "🏷️  已创建本地 tag：$new_version"
+echo "🏷️ 已创建本地 tag：$new_version"
 
 git push origin "$new_version"
 echo "🚀 已推送 tag 到远程仓库：origin/$new_version"
