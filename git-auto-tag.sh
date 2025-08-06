@@ -2,21 +2,23 @@
 
 set -e
 
-# 确保当前是 Git 仓库
+# 确保是 git 仓库
 if ! git rev-parse --git-dir > /dev/null 2>&1; then
   echo "❌ 当前目录不是 Git 仓库"
   exit 1
 fi
 
-# 获取最后一个 tag（若无则为空）
-last_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+# 拉取远程 tag（只 fetch 不合并代码）
+git fetch --tags
+
+# 获取所有 tag 中“语义版本号最大”的
+last_tag=$(git tag | sort -V | tail -n 1)
 
 if [ -z "$last_tag" ]; then
-  echo "⚠️ 未找到tag，默认初始版本为 0.0.1"
+  echo "⚠️ 未找到 tag，默认初始版本为 0.0.1"
   new_version="0.0.1"
 else
-  echo "🔍 当前tag：$last_tag"
-  # 判断是否带 v 前缀
+  echo "🔍 检测到最新 tag：$last_tag"
   if echo "$last_tag" | grep -q "^v"; then
     has_v_prefix=true
     clean_tag=$(echo "$last_tag" | sed 's/^v//')
@@ -25,7 +27,7 @@ else
     clean_tag="$last_tag"
   fi
 
-  # 拆分版本号为 x.y.z 格式
+  # 拆分 x.y.z
   IFS='.' read -r major minor patch <<EOF
 $clean_tag
 EOF
@@ -37,11 +39,12 @@ EOF
   [ "$has_v_prefix" = true ] && new_version="v$new_version"
 fi
 
-echo "✅ 新版本号：$new_version"
+echo "✅ 最新 tag：$last_tag"
+echo "🔧 新版本号：$new_version"
 
 # 创建并推送 tag
 git tag "$new_version"
 echo "🏷️ 已创建本地 tag：$new_version"
 
 git push origin "$new_version"
-echo "🚀 已推送 tag 到远程仓库：origin/$new_version"
+echo "🚀 已推送 tag 到远程：origin/$new_version"
