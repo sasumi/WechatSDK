@@ -11,7 +11,8 @@ use LFPhp\WechatSdk\Message\Event\EventSubscribe;
 use LFPhp\WechatSdk\Message\Event\EventUnSubscribe;
 use LFPhp\WechatSdk\Message\Message\MessageText;
 use ReflectionObject;
-use function LFPhp\WechatSdk\Util\array_to_xml;
+
+use function LFPhp\Func\array_to_xml;
 
 class MessageBase implements JsonSerializable {
 	const MSG_TYPE_EVENT = 'event';

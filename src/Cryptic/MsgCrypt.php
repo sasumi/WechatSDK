@@ -4,7 +4,7 @@ namespace LFPhp\WechatSdk\Cryptic;
 
 use Exception;
 use function LFPhp\Func\array_get;
-use function LFPhp\WechatSdk\Util\array_to_xml;
+use function LFPhp\Func\array_to_xml;
 use function LFPhp\WechatSdk\Util\wechat_sha1;
 use function LFPhp\WechatSdk\Util\xml_to_array;
 
