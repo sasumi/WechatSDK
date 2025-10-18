@@ -26,6 +26,7 @@
         "ext-mcrypt": "*",
         "ext-libxml": "*",
         "lfphp/logger": "^2.0",
-        "lfphp/func": "^2.0"
+        "lfphp/func": "^2.0",
+        "phpseclib/mcrypt_compat": "^2.0"
     }
 }

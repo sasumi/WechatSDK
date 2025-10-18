@@ -87,7 +87,7 @@ class MessageBase implements JsonSerializable {
 		return (array)$this;
 	}
 
-	public function jsonSerialize() {
+	public function jsonSerialize(): array {
 		return $this->toArray();
 	}
 }
