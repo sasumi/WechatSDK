@@ -33,7 +33,7 @@ class NativePay extends PayService {
                 'out_trade_no' => $param['out_trade_no'],
                 'notify_url' => $param['notify_url'],
                 'amount' => [
-                    'total' => $param['amount'],
+                    'total' => (int)$param['amount'],
                     'currency' => $param['currency'],
                 ]
             ]

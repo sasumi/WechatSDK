@@ -10,8 +10,8 @@ use function LFPhp\Func\array_clean_null;
 use function LFPhp\Func\array_merge_assoc;
 use function LFPhp\Func\curl_data2str;
 use function LFPhp\Func\curl_get;
+use function LFPhp\Func\curl_post;
 use function LFPhp\Func\curl_post_file;
-use function LFPhp\Func\curl_post_json;
 use function LFPhp\Func\curl_query;
 use const LFPhp\Func\HTTP_METHOD_GET;
 use const LFPhp\Func\HTTP_METHOD_POST;
@@ -36,7 +36,10 @@ abstract class BaseService {
 		$logger = Logger::instance(__CLASS__);
 		$logger->info("[$request_method]", $url, $param, $file_map);
 
-		$curl_opt = [CURLOPT_TIMEOUT => self::DEFAULT_TIMEOUT, CURLOPT_HTTPHEADER => $headers];
+		$curl_opt = [
+			CURLOPT_TIMEOUT => self::DEFAULT_TIMEOUT,
+			CURLOPT_HTTPHEADER => $headers
+		];
 		switch ($request_method) {
 			case HTTP_METHOD_GET:
 				$ret = curl_get($url, $param, $curl_opt);
@@ -46,7 +49,11 @@ abstract class BaseService {
 				if ($file_map) {
 					$ret = curl_post_file($url, $file_map, $param, $curl_opt);
 				} else {
-					$ret = curl_post_json($url, $param, $curl_opt);
+					//微信后台接收JSON对Unicode支持不好，必须加上JSON_UNESCAPED_UNICODE参数，否则中文会被转义成\uXXXX的形式，导致微信后台无法正确解析
+					$data = json_encode($param, JSON_UNESCAPED_UNICODE);
+					$curl_opt[CURLOPT_HTTPHEADER][] = 'Content-Type: application/json; charset=utf-8';
+					$curl_opt[CURLOPT_HTTPHEADER][] = 'Content-Length: ' . strlen($data);
+					$ret = curl_post($url, $data, $curl_opt);
 				}
 				break;
 
