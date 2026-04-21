@@ -48,15 +48,15 @@ abstract class PayService extends BaseService {
         self::$merchant_info = $merchant_info;
     }
 
-    protected function getMerchantInfo() {
+    protected static function getMerchantInfo() {
         return self::$merchant_info;
     }
 
-    protected function getAppId() {
+    protected static function getAppId() {
         return self::$merchant_info['app_id'];
     }
 
-    protected function getMerchantId() {
+    protected static function getMerchantId() {
         return self::$merchant_info['merchant_id'];
     }
 
