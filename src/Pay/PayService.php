@@ -6,7 +6,6 @@ use Exception;
 use LFPhp\WechatSdk\Base\BaseService;
 use LFPhp\WechatSdk\Exception\PayException;
 
-use function LFPhp\Func\array_clean_null;
 use function LFPhp\Func\assert_via_exception;
 use function LFPhp\Func\dump;
 use function LFPhp\Func\is_url;
@@ -134,11 +133,6 @@ abstract class PayService extends BaseService {
     protected static function sendJsonRequest($url, $param = null, $request_method = HTTP_METHOD_POST, array $file_map = [], $headers = []) {
         if (!is_url($url)) {
             $url = self::patchApiUrl($url);
-        }
-        //POST方法，直接转换成JSON，避免后面计算签名时出错
-        if ($request_method === HTTP_METHOD_POST && is_array($param)) {
-            $param = array_clean_null($param);
-            $param = json_encode($param, JSON_UNESCAPED_UNICODE);
         }
         $headers = array_merge([
             'Accept' => 'application/json',
