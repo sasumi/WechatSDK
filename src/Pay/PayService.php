@@ -20,6 +20,7 @@ abstract class PayService extends BaseService {
     private static $merchant_info = [
         'app_id' => '', //「应用ID」
         'merchant_id' => '', //「商户号」
+        'apiv3_key' => '', //「APIv3密钥」用于解密回调通知
 
         'merchant_certificate_serial' => '', //「商户API证书」的「证书序列号」
         'merchant_private_key_file' => '', //「商户API证书」的「证书序列号」
@@ -149,10 +150,64 @@ abstract class PayService extends BaseService {
     }
 
     /**
-     * 获取回调数据
+     * 获取回调数据（已解密）
      */
     public static function getJsonFromCallback() {
-        return json_decode(self::validateCallback(), true);
+        $data = self::validateCallback();
+        $callback_data = json_decode($data, true);
+
+        // 解密 resource 数据
+        if (isset($callback_data['resource'])) {
+            $resource = $callback_data['resource'];
+            if ($resource['algorithm'] === 'AEAD_AES_256_GCM') {
+                $decrypted = self::decryptAES256GCM(
+                    $resource['ciphertext'],
+                    $resource['nonce'],
+                    $resource['associated_data']
+                );
+                $callback_data['resource'] = json_decode($decrypted, true);
+            }
+        }
+
+        return $callback_data;
+    }
+
+    /**
+     * AEAD_AES_256_GCM 解密
+     * @param string $ciphertext 加密文本（Base64编码）
+     * @param string $nonce 随机串
+     * @param string $associated_data 附加数据
+     * @return string 解密后的明文
+     */
+    private static function decryptAES256GCM($ciphertext, $nonce, $associated_data) {
+        $apiv3_key = self::$merchant_info['apiv3_key'];
+        if (!$apiv3_key) {
+            throw new PayException('缺少 apiv3_key 配置，请前往https://pay.weixin.qq.com/index.php/core/cert/api_cert#/ 配置');
+        }
+
+        // Base64解码密文
+        $ciphertext = base64_decode($ciphertext);
+
+        // 提取tag（最后16字节）
+        $tag = substr($ciphertext, -16);
+        $encrypted_data = substr($ciphertext, 0, -16);
+
+        // 使用 openssl_decrypt 解密
+        $decrypted = openssl_decrypt(
+            $encrypted_data,
+            'aes-256-gcm',
+            $apiv3_key,
+            OPENSSL_RAW_DATA,
+            $nonce,
+            $tag,
+            $associated_data
+        );
+
+        if ($decrypted === false) {
+            throw new PayException('解密失败');
+        }
+
+        return $decrypted;
     }
 
     /**
