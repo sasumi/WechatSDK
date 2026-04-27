@@ -188,7 +188,7 @@ abstract class PayService extends BaseService {
     }
 
     public static function responseSuccessToWechat() {
-        header('Content-Type: text/plain');
+        header('Content-Type: text/xml');
         echo '<xml>
   <return_code><![CDATA[SUCCESS]]></return_code>
   <return_msg><![CDATA[OK]]></return_msg>
