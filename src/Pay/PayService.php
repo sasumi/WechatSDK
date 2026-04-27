@@ -149,6 +149,8 @@ abstract class PayService extends BaseService {
         dump($rsp, 1);
     }
 
+
+
     /**
      * 获取回调数据（已解密）
      */
@@ -165,11 +167,32 @@ abstract class PayService extends BaseService {
                     $resource['nonce'],
                     $resource['associated_data']
                 );
-                $callback_data['resource'] = json_decode($decrypted, true);
+                $info = json_decode($decrypted, true);
+                $callback_data['order_info'] = [
+                    'payer_openid' => $info['payer']['openid'] ?? '',
+                    'out_trade_no' => $info['out_trade_no'] ?? '',
+                    'transaction_id' => $info['transaction_id'] ?? '',
+                    'trade_type' => $info['trade_type'] ?? '', //交易类型，见TRADE_TYPE_MAP
+                    'trade_state' => $info['trade_state'] ?? '', //交易状态，见TRADE_STATE_MAP
+                    'amount_value' => $info['amount']['total'] ?? 0, //订单金额，单位为分
+                    'amount_currency' => $info['amount']['currency'] ?? '', //订单金额币种，符合ISO 4217标准的三位字母代码，默认人民币：CNY
+                    'payer_total' => $info['amount']['payer_total'] ?? 0, //用户支付金额，单位为分
+                    'payer_currency' => $info['amount']['payer_currency'] ?? '', //用户支付金额币种，符合ISO 4217标准的三位字母代码，默认人民币：CNY
+                    'bank_type' => $info['bank_type'] ?? '', //银行类型，采用字符串类型的银行标识，银行类型见银行类型列表
+                    'success_time' => $info['success_time'] ? date('Y-m-d H:i:s', strtotime($info['success_time'])) : '', //转本地时间，原格式为UTC格式，如 "2020-12-31T23:59:59+00:00"
+                ];
             }
         }
 
         return $callback_data;
+    }
+
+    public static function responseSuccessToWechat() {
+        header('Content-Type: text/plain');
+        echo '<xml>
+  <return_code><![CDATA[SUCCESS]]></return_code>
+  <return_msg><![CDATA[OK]]></return_msg>
+</xml>';
     }
 
     /**
