@@ -324,12 +324,13 @@ wx.ready(()=>{
 $merchant_info = [
     'app_id' => '', //「应用ID」
     'merchant_id' => '', //「商户号」
-    'merchant_certificate_serial' => '', //「商户API证书」的「证书序列号」
-    'merchant_private_key_file' => 'abc.pem', //商户API证书文件
-    'platform_certificate_serial' => '', //「微信支付平台证书」的「平台证书序列号」, 可以从「微信支付平台证书」文件解析，也可以在 商户平台 -> 账户中心 -> API安全 查询到
-    'platform_certificate_file' => '', //从本地文件中加载「微信支付平台证书」，可由内置CLI工具下载到，用来验证微信支付应答的签名
-    'platform_public_key_id' => '', //「微信支付公钥」的「微信支付公钥ID」，需要在 商户平台 -> 账户中心 -> API安全 查询
-    'platform_public_key_file' => 'puk.pem', //从本地文件中加载「微信支付公钥」，用来验证微信支付应答的签名
+    'apiv3_key' => '', //「APIv3密钥」用于解密回调通知
+
+    'merchant_api_serial' => '', //「商户API证书」的「证书序列号」
+    'merchant_api_key_file' => '', //「商户API证书」的「证书文件路径」
+
+    'platform_serial' => '', //「微信支付平台证书」的「平台证书序列号」, 可以从「微信支付平台证书」文件解析，也可以在 商户平台 -> 账户中心 -> API安全 查询到
+    'platform_cert_file' => '', //从本地文件中加载「微信支付平台证书」，可由内置CLI工具下载到，用来验证微信支付应答的签名
 ];
 ```
 

@@ -3,9 +3,11 @@
 namespace LFPhp\WechatSdk\Pay;
 
 use Exception;
+use LFPhp\Logger\Logger;
 use LFPhp\WechatSdk\Base\BaseService;
 use LFPhp\WechatSdk\Exception\PayException;
 
+use function LFPhp\Func\array_clean_null;
 use function LFPhp\Func\assert_via_exception;
 use function LFPhp\Func\dump;
 use function LFPhp\Func\is_url;
@@ -22,14 +24,11 @@ abstract class PayService extends BaseService {
         'merchant_id' => '', //「商户号」
         'apiv3_key' => '', //「APIv3密钥」用于解密回调通知
 
-        'merchant_certificate_serial' => '', //「商户API证书」的「证书序列号」
-        'merchant_private_key_file' => '', //「商户API证书」的「证书序列号」
+        'merchant_api_serial' => '', //「商户API证书」的「证书序列号」
+        'merchant_api_key_file' => '', //「商户API证书」的「证书文件路径」
 
-        'platform_certificate_serial' => '', //「微信支付平台证书」的「平台证书序列号」, 可以从「微信支付平台证书」文件解析，也可以在 商户平台 -> 账户中心 -> API安全 查询到
-        'platform_certificate_file' => '', //从本地文件中加载「微信支付平台证书」，可由内置CLI工具下载到，用来验证微信支付应答的签名
-
-        'platform_public_key_id' => '', //「微信支付公钥」的「微信支付公钥ID」，需要在 商户平台 -> 账户中心 -> API安全 查询
-        'platform_public_key_file' => '', //从本地文件中加载「微信支付公钥」，用来验证微信支付应答的签名
+        'platform_serial' => '', //「微信支付平台证书」的「平台证书序列号」, 可以从「微信支付平台证书」文件解析，也可以在 商户平台 -> 账户中心 -> API安全 查询到
+        'platform_cert_file' => '', //从本地文件中加载「微信支付平台证书」，可由内置CLI工具下载到，用来验证微信支付应答的签名
     ];
 
     final private function __construct() {
@@ -47,10 +46,6 @@ abstract class PayService extends BaseService {
             throw new PayException('keys required:' . join(',', $keys));
         }
         self::$merchant_info = $merchant_info;
-    }
-
-    protected static function getMerchantInfo() {
-        return self::$merchant_info;
     }
 
     protected static function getAppId() {
@@ -105,12 +100,16 @@ abstract class PayService extends BaseService {
         }
         $message = "{$request_method}\n{$canonical_url}\n{$timestamp}\n{$nonce_str}\n{$body}\n";
 
-        $privateKey = file_get_contents(self::$merchant_info['merchant_private_key_file']);
+        $privateKey = file_get_contents(self::$merchant_info['merchant_api_key_file']);
         openssl_sign($message, $signature, $privateKey, 'sha256WithRSAEncryption');
         $signature = base64_encode($signature);
-
-        $serial_no = self::$merchant_info['merchant_certificate_serial'];
+        $serial_no = self::$merchant_info['merchant_api_serial'];
         $merchant_id = self::getMerchantId();
+
+        Logger::debug("merchant_info:", self::$merchant_info);
+        Logger::debug("signature message:", $message);
+        Logger::debug("signature:", $signature);
+
         $auth_str = "mchid=\"{$merchant_id}\",nonce_str=\"{$nonce_str}\",signature=\"{$signature}\",timestamp=\"{$timestamp}\",serial_no=\"{$serial_no}\"";
         return $auth_str;
     }
@@ -140,6 +139,7 @@ abstract class PayService extends BaseService {
             'User-Agent' => 'PHP-WechatSdk',
             'Authorization' => 'WECHATPAY2-SHA256-RSA2048 ' . self::getAuthorization($url, $request_method, $param),
         ], $headers);
+        Logger::info("Request Headers:", $headers);
         return parent::sendJsonRequest($url, $param, $request_method, $file_map, $headers);
     }
 
@@ -148,8 +148,6 @@ abstract class PayService extends BaseService {
         //todo
         dump($rsp, 1);
     }
-
-
 
     /**
      * 获取回调数据（已解密）
@@ -250,7 +248,7 @@ abstract class PayService extends BaseService {
         $message = "{$wechatpay_timestamp}\n{$wechatpay_nonce}\n{$body}\n";
 
         //读取微信支付平台证书
-        $platform_cert = file_get_contents(self::$merchant_info['platform_certificate_file']);
+        $platform_cert = file_get_contents(self::$merchant_info['platform_cert_file']);
         $public_key = openssl_pkey_get_public($platform_cert);
 
         //验证签名
@@ -259,7 +257,7 @@ abstract class PayService extends BaseService {
         //释放资源
         openssl_free_key($public_key);
         if ($result !== 1) {
-            throw new PayException('签名验证失败');
+            throw new PayException('回调数据签名验证失败');
         }
         return $body;
     }
@@ -306,8 +304,8 @@ abstract class PayService extends BaseService {
         $out_refund_no = $param['out_refund_no'];
         $reason = $param['reason'] ?? null;
         $notify_url = $param['notify_url'] ?? null;
-        $amount = $param['amount'];
-        $total = $param['total'];
+        $amount = floatval($param['amount'] ?? 0);
+        $total = floatval($param['total'] ?? 0);
         $currency = $param['currency'] ?? CURRENCY_CNY;
         $funds_account = $param['funds_account'] ?? null;
 
@@ -318,13 +316,13 @@ abstract class PayService extends BaseService {
             throw new PayException('订单金额total不能为空');
         }
         if (!$out_refund_no) {
-            throw new PayException('out_refund_no不能为空');
+            throw new PayException('退款单号out_refund_no不能为空');
         }
         if (!$transaction_id && !$out_trade_no) {
             throw new PayException('transaction_id和out_trade_no不能同时为空');
         }
 
-        $rsp = self::postJsonSuccess("/v3/refund/domestic/refunds", [
+        $params = array_clean_null([
             'transaction_id' => $transaction_id,
             'out_trade_no' => $out_trade_no,
             'out_refund_no' => $out_refund_no,
@@ -337,6 +335,7 @@ abstract class PayService extends BaseService {
                 'currency' => $currency,
             ]
         ]);
+        $rsp = self::postJsonSuccess("/v3/refund/domestic/refunds", $params);
         return $rsp;
     }
 
