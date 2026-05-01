@@ -3,6 +3,7 @@
 namespace LFPhp\WechatSdk\Pay;
 
 use function LFPhp\Func\array_clean_empty;
+use function LFPhp\Func\get_client_ip;
 use function LFPhp\WechatSdk\Util\assert_attrs_no_empty;
 use function LFPhp\WechatSdk\Util\in_android;
 use function LFPhp\WechatSdk\Util\in_ios;
@@ -39,7 +40,7 @@ class H5Pay extends PayService {
             'expire_timestamp' => null,
             'attach' => null,
             'payer_client_ip' => null,
-            'scene_type' => '',
+            'scene_type' => null,
         ], $param);
 
         $param = array_clean_empty($param);
@@ -60,7 +61,7 @@ class H5Pay extends PayService {
                     'currency' => $param['currency'] ?: CURRENCY_CNY,
                 ],
                 'scene_info' => [
-                    'payer_client_ip' => $param['payer_client_ip'],
+                    'payer_client_ip' => $param['payer_client_ip'] ?: get_client_ip(),
                     'h5_info' => [
                         'type' => $param['scene_type'] ?: self::detectedSceneType(),
                     ],
