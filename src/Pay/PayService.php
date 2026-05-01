@@ -134,6 +134,9 @@ abstract class PayService extends BaseService {
         if (!is_url($url)) {
             $url = self::patchApiUrl($url);
         }
+        if (is_array($param)) {
+            $param = array_clean_null($param);
+        }
         $headers = array_merge([
             'Accept' => 'application/json',
             'User-Agent' => 'PHP-WechatSdk',
@@ -264,6 +267,7 @@ abstract class PayService extends BaseService {
 
     /**
      * 关闭订单
+     * @param string $out_trade_no 商户订单号
      */
     public static function closeOrderByOutTradeNo($out_trade_no) {
         $rsp = self::postJson("/v3/pay/transactions/out-trade-no/$out_trade_no/close", [
@@ -322,7 +326,7 @@ abstract class PayService extends BaseService {
             throw new PayException('transaction_id和out_trade_no不能同时为空');
         }
 
-        $params = array_clean_null([
+        $rsp = self::postJsonSuccess("/v3/refund/domestic/refunds", [
             'transaction_id' => $transaction_id,
             'out_trade_no' => $out_trade_no,
             'out_refund_no' => $out_refund_no,
@@ -335,7 +339,6 @@ abstract class PayService extends BaseService {
                 'currency' => $currency,
             ]
         ]);
-        $rsp = self::postJsonSuccess("/v3/refund/domestic/refunds", $params);
         return $rsp;
     }
 

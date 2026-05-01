@@ -1,4 +1,5 @@
 <?php
+
 namespace LFPhp\WechatSdk\Util;
 
 use Exception;
@@ -8,10 +9,10 @@ use LFPhp\WechatSdk\Cryptic\MsgCrypt;
  * 微信JS API列表
  * @return mixed
  */
-function wechat_js_api_list(){
+function wechat_js_api_list() {
 	static $api_list;
-	if(!isset($api_list)){
-		$api_list = include __DIR__.'/js_api_list.php';
+	if (!isset($api_list)) {
+		$api_list = include __DIR__ . '/js_api_list.php';
 	}
 	return $api_list;
 }
@@ -22,13 +23,13 @@ function wechat_js_api_list(){
  * @param bool $as_return 返回还是直接输出
  * @return string 校验通过字符串
  */
-function wechat_echo_validation($token, $as_return = false){
+function wechat_echo_validation($token, $as_return = false) {
 	$timestamp = $_GET['timestamp'];
 	$signature = $_GET['signature'];
 	$nonce = $_GET['nonce'];
 	$echo_str = $_GET['echostr'];
 	$validate_signature = wechat_sha1($timestamp, $nonce, $token);
-	if(!$as_return){
+	if (!$as_return) {
 		echo $validate_signature === $signature ? $echo_str : 'fail';
 	}
 	return $validate_signature === $signature ? $echo_str : '';
@@ -42,7 +43,7 @@ function wechat_echo_validation($token, $as_return = false){
  * @return array 回调数组
  * @throws \Exception
  */
-function wechat_decode_callback($app_id, $token, $encoding_aes_key){
+function wechat_decode_callback($app_id, $token, $encoding_aes_key) {
 	$post_data = file_get_contents('php://input');
 	$msg_signature = $_GET['msg_signature'];
 	$timestamp = $_GET['timestamp'];
@@ -58,7 +59,7 @@ function wechat_decode_callback($app_id, $token, $encoding_aes_key){
  * @param string $api
  * @return bool
  */
-function wechat_in_js_api($api){
+function wechat_in_js_api($api) {
 	$list = wechat_js_api_list();
 	return in_array($api, $list);
 }
@@ -68,7 +69,7 @@ function wechat_in_js_api($api){
  * @param ...$args
  * @return string
  */
-function wechat_sha1(...$args){
+function wechat_sha1(...$args) {
 	sort($args, SORT_STRING);
 	$str = implode($args);
 	return sha1($str);
@@ -78,7 +79,7 @@ function wechat_sha1(...$args){
  * 判断浏览器在微信中
  * @return bool
  */
-function in_wechat(){
+function in_wechat() {
 	return !!preg_match('/MicroMessenger/i', $_SERVER['HTTP_USER_AGENT']) && !in_wework();
 }
 
@@ -86,7 +87,7 @@ function in_wechat(){
  * 判断浏览器在企业微信中
  * @return bool
  */
-function in_wework(){
+function in_wework() {
 	return !!preg_match('/wxwork/i', $_SERVER['HTTP_USER_AGENT']);
 }
 
@@ -95,8 +96,20 @@ function in_wework(){
  * @param string $xml_str
  * @return array
  */
-function xml_to_array($xml_str){
+function xml_to_array($xml_str) {
 	$xml = simplexml_load_string($xml_str, "SimpleXMLElement", LIBXML_NOCDATA);
 	$json = json_encode($xml);
-	return json_decode($json,true);
+	return json_decode($json, true);
+}
+
+function assert_attrs_no_empty(array $arr, array $keys) {
+	$empty_keys = [];
+	foreach ($keys as $key) {
+		if (empty($arr[$key])) {
+			$empty_keys[] = $key;
+		}
+	}
+	if ($empty_keys) {
+		throw new Exception('attrs empty:' . implode(',', $empty_keys));
+	}
 }
