@@ -75,6 +75,18 @@ function wechat_sha1(...$args) {
 	return sha1($str);
 }
 
+function in_ios(){
+	return !!preg_match('/iPhone|iPad|iPod/i', $_SERVER['HTTP_USER_AGENT']);
+}
+
+function in_android(){
+	return !!preg_match('/Android/i', $_SERVER['HTTP_USER_AGENT']);
+}
+
+function in_mobile(){
+	return in_ios() || in_android();
+}
+
 /**
  * 判断浏览器在微信中
  * @return bool
