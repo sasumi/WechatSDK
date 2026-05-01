@@ -19,7 +19,7 @@ use const LFPhp\Func\HTTP_METHOD_POST;
  * @see https://pay.weixin.qq.com/doc/v3/merchant/4012791874
  */
 abstract class PayService extends BaseService {
-    private static $merchant_info = [
+    protected static $merchant_info = [
         'app_id' => '', //「应用ID」
         'merchant_id' => '', //「商户号」
         'apiv3_key' => '', //「APIv3密钥」用于解密回调通知
@@ -57,6 +57,14 @@ abstract class PayService extends BaseService {
     }
 
     /**
+     * 生成随机字符串
+      * @return string 生成的随机字符串
+     */
+    protected static function generateNonceStr(){
+        return bin2hex(random_bytes(16));
+    }
+
+    /**
      * 微信支付签名
      * @param string $url
      * @param string $request_method
@@ -65,7 +73,7 @@ abstract class PayService extends BaseService {
      */
     private static function getAuthorization($url, $request_method, $param = '') {
         $timestamp = time();
-        $nonce_str = bin2hex(random_bytes(16));
+        $nonce_str = self::generateNonceStr();
         $body = '';
         $url_path = parse_url($url, PHP_URL_PATH);
         $query = parse_url($url, PHP_URL_QUERY);

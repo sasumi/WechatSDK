@@ -11,6 +11,32 @@ use function LFPhp\WechatSdk\Util\assert_attrs_no_empty;
  */
 class JsapiPay extends PayService {
     /**
+     * 生成微信JSAPI支付参数
+     * @param string $prepay_id 预支付交易会话标识
+     * @return array 生成微信JSAPI支付参数
+     */
+    public static function generateWechatJsapiPayParam($prepay_id) {
+        $appId = self::getAppId();
+        $timestamp = strval(time());
+        $nonceStr = self::generateNonceStr();
+        $message = "$appId\n$timestamp\n$nonceStr\nprepay_id=$prepay_id\n";
+        
+        $privateKey = file_get_contents(self::$merchant_info['merchant_api_key_file']);
+        openssl_sign($message, $signature, $privateKey, 'sha256WithRSAEncryption');
+        $signature = base64_encode($signature);
+
+        $param = [
+            'appId' => $appId,
+            'timeStamp' => $timestamp,
+            'nonceStr' => $nonceStr,
+            'package' => "prepay_id=$prepay_id",
+            'signType' => 'RSA',
+            'paySign' => $signature,
+        ];
+        return $param;
+    }
+
+    /**
      * JSAPI下单
      * @return string prepay_id 预支付交易会话标识
      */
