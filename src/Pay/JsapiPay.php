@@ -26,12 +26,12 @@ class JsapiPay extends PayService {
         $signature = base64_encode($signature);
 
         $param = [
-            'appId' => $appId,
-            'timeStamp' => $timestamp,
-            'nonceStr' => $nonceStr,
+            'app_id' => $appId,
+            'timestamp' => $timestamp,
+            'nonce_str' => $nonceStr,
             'package' => "prepay_id=$prepay_id",
-            'signType' => 'RSA',
-            'paySign' => $signature,
+            'sign_type' => 'RSA',
+            'pay_sign' => $signature,
         ];
         return $param;
     }
