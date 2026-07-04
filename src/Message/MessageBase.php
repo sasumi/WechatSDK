@@ -8,6 +8,7 @@ use LFPhp\WechatSdk\Message\Event\EventBase;
 use LFPhp\WechatSdk\Message\Event\EventLocation;
 use LFPhp\WechatSdk\Message\Event\EventScan;
 use LFPhp\WechatSdk\Message\Event\EventSubscribe;
+use LFPhp\WechatSdk\Message\Event\EventTmplMsgSent;
 use LFPhp\WechatSdk\Message\Event\EventUnSubscribe;
 use LFPhp\WechatSdk\Message\Message\MessageText;
 use ReflectionObject;
@@ -33,18 +34,23 @@ class MessageBase implements JsonSerializable {
 		self::MSG_TYPE_VIDEO => '视频消息',
 	];
 
-	//开发者微信号
+	/** @var string 开发者微信号 */
 	public $ToUserName;
 
-	//发送方账号（一个OpenID）
+	/** @var string 发送方账号（一个OpenID） */
 	public $FromUserName;
 
-	//消息创建时间 （整型）
+	/** @var int 消息创建时间 （整型） */
 	public $CreateTime;
 
-	//消息类型，文本为text
+	/** @var string 消息类型，文本为text */
 	public $MsgType;
 
+	/**
+	 * 根据原始数组获取消息实例
+	 * @param array $raw_arr
+	 * @return MessageBase
+	 */
 	final public static function getMessageInstance($raw_arr) {
 		$class = self::resolveMessageClass($raw_arr);
 		$instance = new $class();
@@ -60,6 +66,11 @@ class MessageBase implements JsonSerializable {
 		return $instance;
 	}
 
+	/**
+	 * @param array $raw_arr
+	 * @return string
+	 * @throws Exception
+	 */
 	final public static function resolveMessageClass($raw_arr) {
 		if ($raw_arr['MsgType'] === self::MSG_TYPE_TEXT) {
 			return MessageText::class;
@@ -74,9 +85,13 @@ class MessageBase implements JsonSerializable {
 					return EventScan::class;
 				case EventBase::EVENT_LOCATION:
 					return EventLocation::class;
+				case EventBase::EVENT_TMPL_MSG_SENT:
+					return EventTmplMsgSent::class;
+				default:
+					throw new Exception('event type no support:' . $raw_arr['Event']);
 			}
 		}
-		throw new Exception('message type no support');
+		throw new Exception('message type no support:' . $raw_arr['MsgType']);
 	}
 
 	public function toXml() {
