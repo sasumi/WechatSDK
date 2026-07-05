@@ -89,23 +89,43 @@ abstract class BaseService {
 		return $data;
 	}
 
+	/**
+	 * 发送GET请求并返回JSON结果
+	 * @param string $url
+	 * @param array $param
+	 * @return array|null
+	 */
 	protected static function getJson($url, $param = []) {
 		return static::sendJsonRequest($url, $param, HTTP_METHOD_GET);
 	}
 
+	/**
+	 * 发送POST请求并返回JSON结果,并检查返回结果是否成功
+	 * @param string $url
+	 * @param array $param
+	 * @return array|null
+	 */
 	protected static function postJsonSuccess($url, $param = []) {
 		$data = static::postJson($url, $param);
 		static::assertResultSuccess($data);
 		return $data;
 	}
 
+	/**
+	 * 发送POST请求并返回JSON结果
+	 * @param string $url
+	 * @param array $param
+	 * @return array|null
+	 */
 	protected static function postJson($url, $param = []) {
 		return static::sendJsonRequest($url, $param, HTTP_METHOD_POST);
 	}
 
 	/**
+	 * 检查微信接口返回结果是否成功，如果不成功则抛出异常
+	 * 微信接口返回的错误格式为：
 	 * {"errcode":40013,"errmsg":"invalid appid"}
-	 * @param $rsp_data
+	 * @param array $rsp_data
 	 * @return void
 	 */
 	protected static function assertResultSuccess($rsp_data) {

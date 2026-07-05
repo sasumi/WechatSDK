@@ -10,6 +10,7 @@ use const LFPhp\Func\HTTP_METHOD_POST;
  * 包含access token信息的基础服务
  */
 abstract class AuthorizedService extends BaseService {
+	/** @var string access token */
 	private static $access_token;
 
 	/**
@@ -26,6 +27,15 @@ abstract class AuthorizedService extends BaseService {
 		self::$access_token = $access_token;
 	}
 
+	/**
+	 * @param string $url
+	 * @param array $param
+	 * @param string $request_method
+	 * @param array $file_map
+	 * @param array $headers
+	 * @return mixed
+	 * @throws Exception
+	 */
 	protected static function sendJsonRequest($url, $param = [], $request_method = HTTP_METHOD_POST, $file_map = [], $headers = []) {
 		$access_token = static::getAccessToken();
 		if (!$access_token) {

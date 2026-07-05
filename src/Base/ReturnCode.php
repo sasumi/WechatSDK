@@ -5,7 +5,7 @@ namespace LFPhp\WechatSdk\Base;
 abstract class ReturnCode {
 	/**
 	 * 根据错误码返回提醒信息
-	 * @param $code
+	 * @param string $code
 	 * @return array [技术消息,友好消息] 友好消息可能为空
 	 */
 	public static function getMessages($code){
