@@ -7,6 +7,10 @@ use LFPhp\WechatSdk\CustomerService\CMsg\CMsgAbstract;
 
 use const LFPhp\Func\HTTP_METHOD_POST;
 
+/**
+ * https://developers.weixin.qq.com/doc/service/api/customer/message/api_sendcustommessage.html
+ * https://developers.weixin.qq.com/doc/service/api/customer/message/api_getmsglist.html
+ */
 class CustomerMsg extends AuthorizedService {
     /** 消息来源：客服 */
     const MSG_FROM_CUSTOMER = 'customer';
