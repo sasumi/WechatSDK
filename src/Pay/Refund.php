@@ -72,6 +72,40 @@ class Refund extends PayService {
     }
 
     /**
+     * 查询退款
+     * @param string $out_refund_no 商户退款单号
+     * @return array
+     * {
+     *     "refund_id": "50000000382019052709732678859",
+     *     "out_refund_no": "1217752501201407033233368018",
+     *     "transaction_id": "1217752501201407033233368018",
+     *     "out_trade_no": "1217752501201407033233368018",
+     *     "channel": "ORIGINAL",
+     *     "user_received_account": "支付用户零钱",
+     *     "success_time": "2019-08-26T10:39:04+08:00",
+     *     "create_time": "2019-08-26T10:39:04+08:00",
+     *     "status": "SUCCESS",
+     *     "funds_account": "UNSETTLED",
+     *     "amount": {
+     *         "total": 999,
+     *         "refund": 999,
+     *         "payer_total": 999,
+     *         "payer_refund": 999,
+     *         "settlement_total": 999,
+     *         "settlement_refund": 999,
+     *         "discount_refund": 0,
+     *         "currency": "CNY",
+     *         "refund_fee": 0
+     *     }
+     * }
+     */
+    public static function queryRefundByOutRefundNo($out_refund_no) {
+        //该接口无查询参数，商户号由签名认证信息携带
+        $rsp = self::getJsonSuccess("/v3/refund/domestic/refunds/$out_refund_no");
+        return $rsp;
+    }
+
+    /**
      * 发起异常退款
      * 提交退款申请后，退款结果通知或查询退款确认状态为退款异常，可调用此接口发起异常退款处理。支持退款至用户、退款至交易商户银行账户两种处理方式。
      */
